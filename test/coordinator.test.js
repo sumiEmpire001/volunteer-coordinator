@@ -1,0 +1,12 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {addShift,assign,unassign,report} from "../coordinator.js";
+const seed=()=>addShift([],{id:"s1",title:"Cleanup",date:"2026-11-10",capacity:2});
+test("create shift",()=>assert.equal(seed().length,1));
+test("duplicate shift",()=>assert.throws(()=>addShift(seed(),{id:"s1",title:"Other",date:"2026-11-10",capacity:2})));
+test("assign volunteer",()=>assert.equal(assign(seed(),"s1","Ada")[0].volunteers[0],"Ada"));
+test("duplicate volunteer",()=>assert.throws(()=>assign(assign(seed(),"s1","Ada"),"s1","Ada")));
+test("capacity limit",()=>assert.throws(()=>assign(assign(assign(seed(),"s1","Ada"),"s1","Bob"),"s1","Cara")));
+test("unassign",()=>assert.equal(unassign(assign(seed(),"s1","Ada"),"s1","Ada")[0].volunteers.length,0));
+test("report",()=>assert.equal(report(assign(seed(),"s1","Ada")).filled,1));
+test("invalid capacity",()=>assert.throws(()=>addShift([],{id:"s2",title:"Cleanup",date:"2026-11-10",capacity:0})));
